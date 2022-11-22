@@ -280,7 +280,8 @@ class GLM_single():
             'sessionindicator',
             'hrflibrary',
             'hrftoassume',
-            'maxpolydeg'
+            'maxpolydeg',
+            'hrfonset'
         ]
         for key in params.keys():
             if key not in allowed:
@@ -433,12 +434,12 @@ class GLM_single():
 
         if 'hrftoassume' not in params:
             params['hrftoassume'] = normalisemax(
-                getcanonicalhrf(stimdur, tr),
+                getcanonicalhrf(stimdur, tr, onset = params['hrfonset']),
                 dim='global'
             )
 
         if 'hrflibrary' not in params:
-            params['hrflibrary'] = getcanonicalhrflibrary(stimdur, tr).T
+            params['hrflibrary'] = getcanonicalhrflibrary(stimdur, tr, onset = params['hrfonset']).T
 
         # deal with length issues and other miscellaneous things
         if type(params['maxpolydeg']) is int:

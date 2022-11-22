@@ -481,7 +481,7 @@ def glm_estimatemodel(design, data, stimdur, tr, hrfmodel, hrfknobs,
         if hrfmodel == 'fir':
             hrfknobs = 20
         else:
-            hrfknobs = normalisemax(getcanonicalhrf(stimdur, tr))
+            hrfknobs = normalisemax(getcanonicalhrf(stimdur, tr, onset = opt['hrfonset']))
 
     if resampling == 0:
         resamplecase = 'full'

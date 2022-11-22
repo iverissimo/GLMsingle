@@ -5,7 +5,7 @@ from scipy.interpolate import pchip
 fpath = os.path.dirname(os.path.realpath(__file__))
 
 
-def getcanonicalhrf(duration, tr):
+def getcanonicalhrf(duration, tr, onset = 0):
     # inputs
     if duration == 0:
         duration = 0.1
@@ -24,7 +24,7 @@ def getcanonicalhrf(duration, tr):
 
     # resample to desired TR
     hrf = pchip(
-        np.asarray(range(hrf.shape[0]))*trold,
+        np.asarray(range(hrf.shape[0]))*trold + onset,
         hrf)(sampler)
 
     # make the peak equal to one
@@ -38,7 +38,7 @@ def basichrf():
     return hrf
 
 
-def getcanonicalhrflibrary(duration, tr):
+def getcanonicalhrflibrary(duration, tr, onset = 0):
     """
      function hrfs = getcanonicalhrflibrary(duration,tr)
 
@@ -81,7 +81,7 @@ def getcanonicalhrflibrary(duration, tr):
 
     # resample to desired TR
     hrfsc = [pchip(
-            np.asarray(range(x.shape[0]))*trold,
+            np.asarray(range(x.shape[0]))*trold + onset,
             x)(sampler) for x in hrfsc]
 
     hrfs = np.vstack(hrfsc)
