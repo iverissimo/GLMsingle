@@ -980,7 +980,7 @@ class GLM_single():
             badR2 = onoffR2 < params['brainR2']
 
             # logical indicating voxels that satisfy all criteria
-            if not params['brainexclude']:
+            if (isinstance(params['brainexclude'],bool) and not params['brainexclude']):
                 noisepool = (bright * badR2)
             else:
                 noisepool = (bright * badR2 * params['brainexclude'])
