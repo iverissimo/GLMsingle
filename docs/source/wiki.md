@@ -2,9 +2,9 @@
 
 ## Basic information
 
-GLMsingle is introduced and described in the following pre-print:
+GLMsingle is introduced and described in the following paper:
 
-[Prince, J.S., Charest, I., Kurzawski, J.W., Pyles, J.A., Tarr, M.J., Kay, K.N. GLMsingle: a toolbox for improving single-trial fMRI response estimates. bioRxiv (2022).](https://doi.org/10.1101/2022.01.31.478431)
+[Prince, J.S., Charest, I., Kurzawski, J.W., Pyles, J.A., Tarr, M., Kay, K.N. Improving the accuracy of single-trial fMRI response estimates using GLMsingle. *eLife* (2022).](https://doi.org/10.7554/eLife.77599)
 
 GLMsingle is an analysis technique (an algorithm) for obtaining accurate
 estimates of single-trial beta weights in fMRI data.
@@ -154,6 +154,8 @@ GLMsingle is designed to estimate betas (response amplitudes) for trials that ar
 A major challenge is how to interpret betas when they reflect amplitudes of timecourses reflecting different durations. This is a tricky general problem, and GLMsingle is not particularly suited to resolving that situation.
 
 Note that within a range, the expected timecourse shape undergoes fairly modest changes. For example, the timecourse shape resulting with convolution of a fixed HRF with a 1-s square wave is quite similar to the result of convolution of that fixed HRF with a 2-s square wave. Certainly, the amplitude is very different (as expected); but the shape is fairly similar. So, one approach is to code events generically as, say, 1.5-s in duration, and this will allow the different activity induced by the 1-s and 2-s events to show up in the estimated response amplitude (betas).
+
+Another potential idea is to code a long event as a string of successive short events. For example, suppose that you have some trials that are 2-s in duration, and that occasionally you have a trial that is 6-s in duration. If you are willing to believe that the 6-s duration event is homogeneous in its neural activity over time, you could code this event as a series of 3 2-s events, and label each of these events as reflecting the same condition. In this way, you still conform to the idea that the timecourse of the hemodynamic response is fixed and that you expect the timecourse shape to summate over time. Once you get the individual single-trial betas out, you can simply, for example, average over the 3 individual betas, if you like.
 
 ### Can I exert control over the noise pool voxels?
 
