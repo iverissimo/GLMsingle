@@ -28,9 +28,6 @@ def zerodiv(x, y, val=0, wantcaution=1):
     # Check if either x or y is empty, return empty if so
     if x.size == 0 or y.size == 0:
         return np.array([])
-    else:
-        y = y.astype('float32')
-        x = x.astype('float32')
 
     # handle special case of y being scalar
     if np.isscalar(y):
