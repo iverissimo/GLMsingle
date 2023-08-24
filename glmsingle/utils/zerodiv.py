@@ -27,6 +27,9 @@ def zerodiv(x, y, val=0, wantcaution=1):
     # Check if either x or y is empty, return empty if so
     if x.size == 0 or y.size == 0:
         return np.array([])
+    else:
+        y = y.astype('float32')
+        x = x.astype('float32')
 
     # handle special case of y being scalar
     if np.isscalar(y):
@@ -44,13 +47,11 @@ def zerodiv(x, y, val=0, wantcaution=1):
         if wantcaution and np.any(np.logical_and(bad2, ~bad)):
             warnings.warn('abs value of one or more divisors is less than 1e-5. we are treating these divisors as 0.')
         if wantcaution:
-            tmp = y
-            tmp[bad2] = 1
-            f = x / tmp[:, np.newaxis]
+            y[bad2] = 1
+            f = x / y[:, np.newaxis]
             f[bad2] = val
         else:
-            tmp = y
-            tmp[bad] = 1
-            f = x / tmp[:, np.newaxis]
+            y[bad] = 1
+            f = x / y[:, np.newaxis]
             f[bad] = val
         return f
