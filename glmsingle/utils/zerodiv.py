@@ -1,5 +1,6 @@
 import numpy as np
 import warnings
+import pdb
 
 def zerodiv(x, y, val=0, wantcaution=1):
     """zerodiv(data1,data2,val,wantcaution)
@@ -47,11 +48,19 @@ def zerodiv(x, y, val=0, wantcaution=1):
         if wantcaution and np.any(np.logical_and(bad2, ~bad)):
             warnings.warn('abs value of one or more divisors is less than 1e-5. we are treating these divisors as 0.')
         if wantcaution:
-            y[bad2] = 1
-            f = x / y[:, np.newaxis]
+            tmp = y
+            tmp[bad2] = 1
+            if x.ndim == 1:
+                f = x / tmp
+            else:
+                f = x / tmp[:, np.newaxis]
             f[bad2] = val
         else:
-            y[bad] = 1
-            f = x / y[:, np.newaxis]
+            tmp = y
+            tmp[bad] = 1
+            if x.ndim == 1:
+                f = x / tmp
+            else:
+                f = x / tmp[:, np.newaxis]
             f[bad] = val
         return f
