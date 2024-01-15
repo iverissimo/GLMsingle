@@ -422,6 +422,8 @@ function [results,resultsdesign] = GLMestimatesingletrial(design,data,stimdur,tr
 % black line. Note that these reflect any user-specified customization (as 
 % controlled via opt.hrftoassume and opt.hrflibrary).
 %
+% runwiseFIR_summaryvoxels.png - the voxels that were used for runwiseFIR.png
+%
 % typeD_R2_runXX.png - the R^2 of the final type-D model computed using data
 % from individual runs (sqrt hot colormap between 0% and 100%)
 %
@@ -576,6 +578,9 @@ if length(outputdir) < 2
 end
 
 % deal with length issues and other miscellaneous things
+if ~iscell(opt.extraregressors)
+  opt.extraregressors = {opt.extraregressors};
+end
 if length(opt.maxpolydeg) == 1
   opt.maxpolydeg = repmat(opt.maxpolydeg,[1 numruns]);
 end
@@ -584,6 +589,7 @@ opt.hrflibrary = normalizemax(opt.hrflibrary,1);
 opt.fracs = sort(unique(opt.fracs),'descend');
 assert(all(opt.fracs>0),'fracs must be greater than 0');
 assert(all(opt.fracs<=1),'fracs must be less than or equal to 1');
+assert(length(opt.extraregressors)==numruns,'<extraregressors> should match the number of runs);
 wantfig = ischar(outputdir{2});  % if outputdir{2} is not NaN, we want figures
 
 % deal with output directory
@@ -644,6 +650,7 @@ for p=1:length(design)
   designSINGLE{p} = zeros(size(design{p},1),numtrials);
   for q=1:size(design{p},1)
     temp = find(design{p}(q,:));
+    assert(length(temp) <= 1,'two conditions have exactly the same trial onset! this is not allowed!');
     if ~isempty(temp)
       cnt = cnt + 1;
       designSINGLE{p}(q,cnt) = 1;
@@ -690,6 +697,17 @@ if any(endbuffers < 8)
   warning('You have specified trial onsets that occur less than 8 seconds from the end of at least one of the runs. This may cause estimation problems! As a solution, consider simply omitting specification of these ending trials from the original design matrix.');
 end
 
+% issue warning if no repeats
+if all(condinruns <= 1)
+  warning('None of your conditions occur in more than one run. Are you sure this is what you intend?');
+  if opt.wantglmdenoise
+    error('Since there are no repeats, <wantglmdenoise> cannot be used and should be set to 0.');
+  end
+  if opt.wantfracridge
+    error('Since there are no repeats, <wantfracridge> cannot be used and should be set to 0.');
+  end
+end
+
 % construct a nice output struct for this design-related stuff
 varstoinsert = {'design' 'stimdur' 'tr' 'opt' 'designSINGLE' 'stimorder' 'numtrialrun' 'condcounts' 'condinruns' 'endbuffers'};
 resultsdesign = struct; 
@@ -718,7 +736,7 @@ firR2 = [];   % X x Y x Z x runs (R2 of FIR model for each run)
 firtcs = [];  % X x Y x Z x 1 x time x runs (FIR timecourse for each run)
 for p=1:length(data)
   results0 = GLMestimatemodel(design0(p),data(p),stimdur,tr,'fir',floor(opt.firdelay/tr),0, ...
-                              struct('extraregressors',{opt.extraregressors}, ...
+                              struct('extraregressors',{opt.extraregressors(p)}, ...
                                      'maxpolydeg',opt.maxpolydeg, ...
                                      'wantpercentbold',opt.wantpercentbold, ...
                                      'suppressoutput',1));
@@ -789,6 +807,7 @@ if wantfig
       imwrite(uint8(255*makeimagestack(firR2(:,:,:,rr),[0 100]).^0.5),hot(256),fullfile(outputdir{2},sprintf('runwiseFIR_R2_run%02d.png',rr)));
     end
     imwrite(uint8(255*makeimagestack(firR2mn,[0 100]).^0.5),hot(256),fullfile(outputdir{2},'runwiseFIR_R2_runavg.png'));
+    imwrite(uint8(255*makeimagestack(firR2mn > firthresh,[0 1])),gray(256),fullfile(outputdir{2},'runwiseFIR_summaryvoxels.png'));
   end
 
 end
@@ -1565,7 +1584,11 @@ for p=1:max(stimorder)
     sdcnt = sdcnt + 1;
   end
 end
-f = sqrt(mean(tempmn.^2,4)) ./ sqrt(mean(tempsd.^2,4));  % RMSdeviationfromzero ./ noisesd
+if isempty(tempsd)
+  f = NaN(size(tempmn));  % if there are no repeats, dmetric is undefined
+else
+  f = sqrt(mean(tempmn.^2,4)) ./ sqrt(mean(tempsd.^2,4));  % RMSdeviationfromzero ./ noisesd
+end
 
 %%%%%%%%%%%%%%%%%%% JUNK:
 
